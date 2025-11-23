@@ -11,6 +11,7 @@ const audioChunks = ref<Blob[]>([])
 const audioURL = ref<string | null>(null)
 const mediaStream = ref<MediaStream | null>(null)
 const isUploading = ref(false)
+const isComparing = ref(false)
 
 const router = useRouter()
 
@@ -62,7 +63,7 @@ const handleRecordingStop = async () => {
   // Simulating upload state for UI feedback
   isUploading.value = true
   try {
-    await uploadAudio(audioBlob, router)
+    await uploadAudio(audioBlob, router, "analyze")
   } finally {
     isUploading.value = false
   }

@@ -1,5 +1,15 @@
-export async function uploadAudio(audioBlob, router) {
-  const endpoint = 'http://localhost:8080/analyze/audio' // **<-- Replace with your actual URL**
+export async function uploadAudio(audioBlob, router, purpose) {
+
+let endpoint;
+  switch (purpose) {
+    case "analyze":
+        endpoint = 'http://localhost:8080/analyze/audio';
+        break;
+    
+      case "compare":
+        endpoint = 'http://localhost:8080/analyze/song-comparison';
+        break;
+  } 
 
   // 1. Create a FormData object
   const formData = new FormData()
