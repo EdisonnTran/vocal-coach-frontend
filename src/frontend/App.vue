@@ -1,16 +1,18 @@
 <script>
+import VocalCoachUI from '@/components/VocalCoachUI.vue';
+
 export default {
+  components: { VocalCoachUI },
   data() {
     return {
       name: 'Hello',
     };
   },
 };
-
 </script>
 
 <template>
-  <h1>{{ name }}</h1>
+  <VocalCoachUI />
 </template>
 
 <style scoped></style>
