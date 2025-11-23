@@ -8,6 +8,7 @@ import {
   Music2,
   Wind,
   Weight,
+  ArrowLeft,
 } from 'lucide-vue-next'
 
 // 1. TypeScript Interfaces
@@ -65,8 +66,11 @@ const MOCK_DATA: AnalysisResult = {
 }
 
 // 3. Get data from history state, with a fallback to MOCK_DATA
-const data = computed(() => (history.state.results || MOCK_DATA) as AnalysisResult)
-
+// Note: In a real browser reload, history.state might be null, so we optional chain just in case.
+const data = computed(
+  () =>
+    ((history.state && history.state.results) || MOCK_DATA) as AnalysisResult
+)
 
 // 4. Helper to organize the Tone Cards for the template
 const toneCards = computed(() => [
@@ -75,131 +79,380 @@ const toneCards = computed(() => [
     value: data.value.vocalToneAnalysis.timbre,
     desc: 'Your unique tone color',
     icon: Mic2,
-    colorClass: 'text-blue-500',
+    colorClass: 'text-green-600',
   },
   {
     label: 'Texture',
     value: data.value.vocalToneAnalysis.texture,
     desc: 'Surface quality of sound',
     icon: Wind,
-    colorClass: 'text-teal-500',
+    colorClass: 'text-green-500',
   },
   {
     label: 'Vocal Weight',
     value: data.value.vocalToneAnalysis.vocalWeight,
     desc: 'Perceived heaviness',
     icon: Weight,
-    colorClass: 'text-purple-500',
+    colorClass: 'text-green-400',
   },
 ])
+
+// Handle navigation back
+const handleBack = () => {
+  if (history.length > 1) {
+    history.back()
+  } else {
+    console.log('No history to go back to - implement fallback routing here')
+  }
+}
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-50 p-6 md:p-12 font-sans text-slate-900">
-    <div class="max-w-4xl mx-auto space-y-8">
-      <header class="text-center space-y-2 mb-10">
-        <div
-          class="inline-flex items-center justify-center p-3 bg-indigo-100 rounded-full mb-4"
-        >
-          <Mic2 class="w-8 h-8 text-indigo-600" />
+  <div class="vocal-report-container">
+    <nav class="nav-bar">
+      <a href="#" @click.prevent="handleBack" class="back-link">
+        <ArrowLeft :size="20" style="margin-right: 8px" />
+        Analyze Another
+      </a>
+    </nav>
+
+    <div class="content-wrapper">
+      <header>
+        <div class="waveform-container">
+          <div
+            class="bar"
+            v-for="n in 6"
+            :key="n"
+            :style="{ animationDelay: `${Math.random() * 0.5}s` }"
+          ></div>
         </div>
-        <h1 class="text-3xl md:text-4xl font-bold text-slate-900">
-          Vocal Analysis Report
-        </h1>
-        <p class="text-slate-500">
-          Here is the breakdown of your unique sound and how to improve.
+        <h1>Vocal Analysis Report</h1>
+        <p class="subtitle">
+          Here is a detailed breakdown of your unique vocal profile and
+          personalized recommendations.
         </p>
       </header>
 
-      <section>
-        <h2 class="text-xl font-semibold mb-4 flex items-center gap-2">
-          <Music2 class="w-5 h-5 text-indigo-600" />
-          Vocal Profile
+      <section class="profile-section">
+        <h2 class="section-title">
+          <Activity class="section-icon" /> Your Vocal Profile
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div
-            v-for="(card, index) in toneCards"
-            :key="index"
-            class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow"
-          >
-            <div class="p-3 bg-slate-50 rounded-full mb-3">
-              <component
-                :is="card.icon"
-                class="w-5 h-5"
-                :class="card.colorClass"
-              />
+        <div class="profile-grid">
+          <div v-for="(card, index) in toneCards" :key="index" class="card">
+            <div class="card-header">
+              <component :is="card.icon" class="metric-icon" />
+              <div class="metric-label">{{ card.label }}</div>
             </div>
-            <h3
-              class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1"
-            >
-              {{ card.label }}
-            </h3>
-            <p class="text-lg font-bold text-slate-900 mb-1">
-              {{ card.value }}
-            </p>
-            <p class="text-xs text-slate-400">
-              {{ card.desc }}
-            </p>
+
+            <div class="metric-value">{{ card.value }}</div>
+            <div class="metric-desc">{{ card.desc }}</div>
+
+            <div class="status-indicator"></div>
           </div>
         </div>
       </section>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <section class="space-y-4">
-          <h2 class="text-xl font-semibold flex items-center gap-2">
-            <AlertCircle class="w-5 h-5 text-amber-500" />
-            Areas for Improvement
+      <div class="recommendations-grid">
+        <div class="rec-card">
+          <h2 class="section-title warning-border">
+            <AlertCircle class="section-icon warning-text" /> Areas for
+            Improvement
           </h2>
-          <div class="space-y-3">
-            <div
-              v-for="(tip, idx) in data.improvementTips"
-              :key="idx"
-              class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm"
-            >
-              <h3
-                class="font-medium text-amber-700 mb-2 flex items-center gap-2"
-              >
-                <span
-                  class="bg-amber-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide font-bold"
-                >
-                  Issue
-                </span>
-                {{ tip.issueName }}
-              </h3>
-              <div class="text-slate-600 text-sm leading-relaxed">
-                <span class="font-semibold text-slate-900">Try this: </span>
-                {{ tip.fix }}
-              </div>
-            </div>
-          </div>
-        </section>
 
-        <section class="space-y-4">
-          <h2 class="text-xl font-semibold flex items-center gap-2">
-            <Activity class="w-5 h-5 text-green-600" />
-            Recommended Exercises
-          </h2>
-          <div class="space-y-3">
-            <div
-              v-for="(exercise, idx) in data.suggestedExercises"
-              :key="idx"
-              class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex gap-4"
-            >
-              <div class="mt-1">
-                <CheckCircle2 class="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <h3 class="font-bold text-slate-900 mb-1">
-                  {{ exercise.exerciseName }}
-                </h3>
-                <p class="text-sm text-slate-600 leading-relaxed">
-                  {{ exercise.description }}
-                </p>
-              </div>
+          <div
+            v-for="(tip, index) in data.improvementTips"
+            :key="index"
+            class="list-item"
+          >
+            <div class="icon-box warning-icon">
+              <AlertCircle :size="20" />
+            </div>
+            <div class="item-content">
+              <h4>{{ tip.issueName }}</h4>
+              <p>{{ tip.fix }}</p>
             </div>
           </div>
-        </section>
+        </div>
+
+        <div class="rec-card">
+          <h2 class="section-title success-border">
+            <Music2 class="section-icon success-text" /> Recommended Exercises
+          </h2>
+
+          <div
+            v-for="(exercise, index) in data.suggestedExercises"
+            :key="index"
+            class="list-item"
+          >
+            <div class="icon-box success-icon">
+              <CheckCircle2 :size="20" />
+            </div>
+            <div class="item-content">
+              <h4>{{ exercise.exerciseName }}</h4>
+              <p>{{ exercise.description }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* --- THEME VARIABLES --- */
+.vocal-report-container {
+  --bg-dark: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-color: #8b5cf6;
+  --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  --success: #10b981;
+  --warning: #f59e0b;
+
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
+    sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.content-wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* --- NAVIGATION --- */
+.nav-bar {
+  max-width: 1000px;
+  margin: 0 auto 2rem auto;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  color: #fff;
+}
+
+/* --- HEADER & ANIMATION --- */
+header {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.waveform-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 40px;
+  margin-bottom: 2rem;
+}
+
+.bar {
+  width: 4px;
+  background: var(--accent-color);
+  border-radius: 2px;
+  animation: wave 1s infinite ease-in-out;
+  opacity: 0.6;
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    height: 10px;
+  }
+  50% {
+    height: 30px;
+  }
+}
+
+/* --- CARDS & GRID --- */
+.section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-icon {
+  color: var(--accent-color);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.metric-icon {
+  color: var(--accent-color);
+  width: 20px;
+  height: 20px;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.metric-value {
+  font-size: 1.5rem; /* Adjusted for longer text like 'Medium-Light' */
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.metric-desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.status-indicator {
+  height: 3px;
+  width: 30px;
+  background: var(--success);
+  border-radius: 2px;
+  margin-top: 1rem;
+  opacity: 0.5;
+}
+
+/* --- RECOMMENDATIONS --- */
+.recommendations-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .recommendations-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rec-card {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.warning-border {
+  border-left: 4px solid var(--warning);
+  padding-left: 1rem;
+}
+.success-border {
+  border-left: 4px solid var(--success);
+  padding-left: 1rem;
+}
+.warning-text {
+  color: var(--warning);
+}
+.success-text {
+  color: var(--success);
+}
+
+.list-item {
+  display: flex;
+  align-items: start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.list-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.warning-icon {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
+.success-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--success);
+}
+
+.item-content h4 {
+  font-size: 1.1rem;
+  margin: 0 0 0.25rem 0;
+  font-weight: 600;
+  color: #fff;
+}
+
+.item-content p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+</style>

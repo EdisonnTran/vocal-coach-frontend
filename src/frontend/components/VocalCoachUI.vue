@@ -59,55 +59,34 @@ export default {
 </template>
 
 <style scoped>
-/* Add some modern styling */
+/* Modern Styling with a Green and White Theme */
 #app-container {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #1F2937; /* Darker text for better contrast */
   max-width: 800px;
   margin: 40px auto;
   padding: 20px;
 }
 
 header {
-  margin-bottom: 40px;
+  margin-bottom: 50px;
 }
 
 h1 {
-  color: #42b983;
+  color: #10B981; /* Vibrant Green */
+  font-size: 2.5rem;
+  font-weight: 600;
 }
 
-.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
+p {
+  font-size: 1.1rem;
+  color: #4B5563; /* Medium gray for subtext */
 }
 
-button {
-  background-color: #42b983;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s;
-}
-
-button:hover {
-  background-color: #36a473;
-}
-
-.results-container ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.results-container li {
-  margin-bottom: 10px;
+main {
+  /* The <Record> component will be placed here */
 }
 </style>
