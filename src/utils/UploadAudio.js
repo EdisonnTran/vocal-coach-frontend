@@ -1,4 +1,4 @@
-export async function uploadAudio(audioBlob) {
+export async function uploadAudio(audioBlob, router) {
   const endpoint = 'http://localhost:8080/analyze/audio' // **<-- Replace with your actual URL**
 
   // 1. Create a FormData object
@@ -26,7 +26,13 @@ export async function uploadAudio(audioBlob) {
     if (response.ok) {
       const result = await response.json()
       console.log('Upload successful!', result)
-      alert('Audio uploaded successfully!')
+      
+      // Navigate to the results page with the data
+      router.push({ 
+        name: 'Results', 
+        state: { results: result } 
+      })
+
     } else {
       console.error('Upload failed with status:', response.status)
       alert('Upload failed.')

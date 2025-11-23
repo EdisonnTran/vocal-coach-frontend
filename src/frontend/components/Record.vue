@@ -84,7 +84,7 @@ export default {
       // Combine all recorded chunks into a single Blob
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
 
-      await uploadAudio(audioBlob);
+      await uploadAudio(audioBlob, this.$router);
     },
   },
   // Clean up the URL when the component is destroyed

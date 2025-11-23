@@ -1,13 +1,9 @@
 <script>
-import VocalCoachUI from '@/frontend/components/VocalCoachUI.vue';
-
-export default {
-  components: { VocalCoachUI },
-};
+export default {};
 </script>
 
 <template>
-  <VocalCoachUI />
+  <router-view />
 </template>
 
 <style scoped></style>
