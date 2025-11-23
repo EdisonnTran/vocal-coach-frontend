@@ -17,10 +17,12 @@
     </button>
 
     <audio v-if="audioURL" :src="audioURL" controls></audio>
+    <p> {{ audioURL }}</p>
   </div>
 </template>
 
 <script>
+import { uploadAudio } from '@/utils/UploadAudio'
 export default {
   data() {
     return {
@@ -78,16 +80,12 @@ export default {
     },
 
     // 3. Process the Recorded Audio
-    handleRecordingStop() {
+    async handleRecordingStop() {
       // Combine all recorded chunks into a single Blob
       const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
 
-      // Create a URL for the Blob that can be used as the <audio> source
-      this.audioURL = URL.createObjectURL(audioBlob);
-
-      // Optionally, emit the Blob to a parent component for saving/uploading
-      this.$emit('audio-recorded', audioBlob);
-    }
+      await uploadAudio(audioBlob);
+    },
   },
   // Clean up the URL when the component is destroyed
   beforeUnmount() {
