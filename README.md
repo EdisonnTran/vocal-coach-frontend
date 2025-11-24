@@ -71,7 +71,10 @@ To get this project up and running on your local machine, follow these steps:
     npm install
     ```
 
-3.  **Start the development servers:**
+3.  **Add .env file:**
+    Add a '.env' file to the root directory and place the variable 'GEMINI_API_KEY' with your api key as the value.
+
+4.  **Start the development servers:**
     From the root directory, run the following command to start both the backend server and the frontend application in development mode.
 
     ```bash
