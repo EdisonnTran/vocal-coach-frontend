@@ -42,42 +42,60 @@ interface AnalysisResult {
   timeline?: TimelineItem[]
 }
 
+interface SongComparisonItem {
+  issue: string
+  exercise: string
+}
+
+interface SongComparisonResult {
+  toneArea: SongComparisonItem
+  rhythmArea: SongComparisonItem
+  highNotesArea: SongComparisonItem
+  vibeArea: SongComparisonItem
+}
+
 const rawState = history.state || {}
-const data = computed(() => rawState.results as AnalysisResult | undefined)
+const data = computed(
+  () => rawState.results as AnalysisResult | SongComparisonResult | undefined
+)
 const audioURL = computed(() => rawState.url as string | undefined)
 const router = useRouter()
 
 onMounted(() => {
-  console.log(data, audioURL)
   if (!data.value || !audioURL.value) {
     console.warn('No analysis data found. Redirecting to recorder...')
     router.replace('/')
   }
 })
 
-const toneCards = computed(() => [
-  {
-    label: 'Timbre',
-    value: data.value?.vocalToneAnalysis?.timbre || '',
-    desc: 'Your unique tone color',
-    icon: Mic2,
-    colorClass: 'text-green-600',
-  },
-  {
-    label: 'Texture',
-    value: data.value?.vocalToneAnalysis?.texture || '',
-    desc: 'Surface quality of sound',
-    icon: Wind,
-    colorClass: 'text-green-500',
-  },
-  {
-    label: 'Vocal Weight',
-    value: data.value?.vocalToneAnalysis?.vocalWeight || '',
-    desc: 'Perceived heaviness',
-    icon: Weight,
-    colorClass: 'text-green-400',
-  },
-])
+const toneCards = computed(() => {
+  if ('vocalToneAnalysis' in data.value) {
+    return [
+      {
+        label: 'Timbre',
+        value: data.value?.vocalToneAnalysis?.timbre || '',
+        desc: 'Your unique tone color',
+        icon: Mic2,
+        colorClass: 'text-green-600',
+      },
+      {
+        label: 'Texture',
+        value: data.value?.vocalToneAnalysis?.texture || '',
+        desc: 'Surface quality of sound',
+        icon: Wind,
+        colorClass: 'text-green-500',
+      },
+      {
+        label: 'Vocal Weight',
+        value: data.value?.vocalToneAnalysis?.vocalWeight || '',
+        desc: 'Perceived heaviness',
+        icon: Weight,
+        colorClass: 'text-green-400',
+      },
+    ]
+  }
+  return []
+})
 
 const handleBack = () => {
   if (history.length > 1) {
@@ -107,22 +125,38 @@ const handleBack = () => {
             :style="{ animationDelay: `${Math.random() * 0.5}s` }"
           ></div>
         </div>
-        <h1>Vocal Analysis Report</h1>
+        <h1>
+          {{
+            'toneArea' in data
+              ? 'Song Comparison Analysis Report'
+              : 'Vocal Analysis Report'
+          }}
+        </h1>
         <p class="subtitle">
           Here is a detailed breakdown of your unique vocal profile and
           personalized recommendations.
+          {{
+            'toneArea' in data
+              ? "Here is a breakdown of how your vocal profile stacks up against the song you're trying to replicate"
+              : 'Here is a detailed breakdown of your unique vocal profile and personalized recommendations.'
+          }}
         </p>
       </header>
 
-      <section class="profile-section">
+      <section class="profile-section" v-if="toneCards">
         <div v-if="audioURL" class="audio-player-container">
           <p class="audio-label">Your Recording:</p>
           <audio :src="audioURL" controls></audio>
         </div>
         <h2 class="section-title">
-          <Activity class="section-icon" /> Your Vocal Profile
+          <Activity class="section-icon" />
+          {{
+            'vocalToneAnalysis' in data
+              ? 'Your Vocal Profile'
+              : 'Improvement Advice'
+          }}
         </h2>
-        <div class="profile-grid">
+        <div class="profile-grid" v-if="'vocalToneAnalysis' in data">
           <div v-for="(card, index) in toneCards" :key="index" class="card">
             <div class="card-header">
               <component :is="card.icon" class="metric-icon" />
@@ -143,7 +177,10 @@ const handleBack = () => {
         </div>
       </section>
 
-      <div class="recommendations-grid">
+      <div
+        class="recommendations-grid"
+        v-if="'improvementTips' in data && 'suggestedExercises' in data"
+      >
         <div class="rec-card">
           <h2 class="section-title warning-border">
             <AlertCircle class="section-icon warning-text" /> Areas for
@@ -190,7 +227,7 @@ const handleBack = () => {
         </div>
       </div>
 
-      <section v-if="data.timeline" class="timeline-section">
+      <section v-if="'timeline' in data" class="timeline-section">
         <h2 class="section-title">
           <CalendarDays class="section-icon" /> Your 7-Day Vocal Plan
         </h2>
@@ -211,6 +248,98 @@ const handleBack = () => {
           </div>
         </div>
       </section>
+
+      <div class="recommendations-grid" v-if="'toneArea' in data">
+        <div class="rec-card">
+          <h2 class="section-title warning-border">
+            <AlertCircle class="section-icon warning-text" /> Areas for
+            Improvement
+          </h2>
+          <div>
+            <div class="list-item">
+              <div class="icon-box warning-icon">
+                <AlertCircle :size="20" />
+              </div>
+              <div class="item-content">
+                <h4>Tone</h4>
+                <p>{{ data.toneArea.issue }}</p>
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="icon-box warning-icon">
+                <AlertCircle :size="20" />
+              </div>
+              <div class="item-content">
+                <h4>Rhythm</h4>
+                <p>{{ data.rhythmArea.issue }}</p>
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="icon-box warning-icon">
+                <AlertCircle :size="20" />
+              </div>
+              <div class="item-content">
+                <h4>High Note</h4>
+                <p>{{ data.highNotesArea.issue }}</p>
+              </div>
+            </div>
+            <div class="list-item">
+              <div class="icon-box warning-icon">
+                <AlertCircle :size="20" />
+              </div>
+              <div class="item-content">
+                <h4>Vibe</h4>
+                <p>{{ data.vibeArea.issue }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="rec-card">
+          <h2 class="section-title success-border">
+            <Music2 class="section-icon success-text" /> Recommended Exercises
+          </h2>
+          <div>
+            <div>
+              <div class="list-item">
+                <div class="icon-box success-icon">
+                  <CheckCircle2 :size="20" />
+                </div>
+                <div class="item-content">
+                  <h4>Tone</h4>
+                  <p>{{ data.toneArea.exercise }}</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="icon-box success-icon">
+                  <CheckCircle2 :size="20" />
+                </div>
+                <div class="item-content">
+                  <h4>Rhythm</h4>
+                  <p>{{ data.rhythmArea.exercise }}</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="icon-box success-icon">
+                  <CheckCircle2 :size="20" />
+                </div>
+                <div class="item-content">
+                  <h4>High Note</h4>
+                  <p>{{ data.highNotesArea.exercise }}</p>
+                </div>
+              </div>
+              <div class="list-item">
+                <div class="icon-box success-icon">
+                  <CheckCircle2 :size="20" />
+                </div>
+                <div class="item-content">
+                  <h4>Vibe</h4>
+                  <p>{{ data.vibeArea.exercise }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
