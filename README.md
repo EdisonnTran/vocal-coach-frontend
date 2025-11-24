@@ -60,8 +60,8 @@ To get this project up and running on your local machine, follow these steps:
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/your-username/vocal-coach-frontend.git
-    cd vocal-coach-frontend
+    git clone https://github.com/your-username/harmonai-vocal-coach.git
+    cd harmonai-vocal-coach
     ```
 
 2.  **Install dependencies:**
