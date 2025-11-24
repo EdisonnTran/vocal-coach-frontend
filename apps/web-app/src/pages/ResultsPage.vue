@@ -133,8 +133,6 @@ const handleBack = () => {
           }}
         </h1>
         <p class="subtitle">
-          Here is a detailed breakdown of your unique vocal profile and
-          personalized recommendations.
           {{
             'toneArea' in data
               ? "Here is a breakdown of how your vocal profile stacks up against the song you're trying to replicate"
